@@ -143,12 +143,19 @@ function parseNaventCards() {
     const description = cardText(card, 'POSTING_CARD_DESCRIPTION');
 
     // Try to extract a project/development name from the card.
-    // Priority: explicit title heading → first short line of description → empty.
+    // Reject anything that looks like a price or numeric feature text.
+    const looksLikePrice = (s) => /\$|mxn|usd|\d{4,}/i.test(s);
     const titleEl = card.querySelector('h2, h3, [data-qa*="TITLE"], [data-qa*="title"]');
-    let project = titleEl ? titleEl.innerText.replace(/\s+/g, ' ').trim() : '';
+    let project = '';
+    if (titleEl) {
+      const t = titleEl.innerText.replace(/\s+/g, ' ').trim();
+      if (!looksLikePrice(t)) project = t;
+    }
     if (!project && description) {
       const firstLine = description.split(/[.\n|·•]/)[0].trim();
-      if (firstLine.length > 0 && firstLine.length <= 60 && !/m²|rec\.|baño|estac\.|precio/i.test(firstLine)) {
+      if (firstLine.length > 0 && firstLine.length <= 60 &&
+          !looksLikePrice(firstLine) &&
+          !/m²|rec\.|baño|estac\.|precio/i.test(firstLine)) {
         project = firstLine;
       }
     }

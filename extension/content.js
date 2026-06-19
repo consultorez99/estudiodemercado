@@ -142,6 +142,17 @@ function parseNaventCards() {
     const gallery = cardText(card, 'POSTING_CARD_GALLERY');
     const description = cardText(card, 'POSTING_CARD_DESCRIPTION');
 
+    // Try to extract a project/development name from the card.
+    // Priority: explicit title heading → first short line of description → empty.
+    const titleEl = card.querySelector('h2, h3, [data-qa*="TITLE"], [data-qa*="title"]');
+    let project = titleEl ? titleEl.innerText.replace(/\s+/g, ' ').trim() : '';
+    if (!project && description) {
+      const firstLine = description.split(/[.\n|·•]/)[0].trim();
+      if (firstLine.length > 0 && firstLine.length <= 60 && !/m²|rec\.|baño|estac\.|precio/i.test(firstLine)) {
+        project = firstLine;
+      }
+    }
+
     let url = card.dataset.toPosting || '';
     try {
       url = new URL(url, location.origin).href;
@@ -150,7 +161,7 @@ function parseNaventCards() {
     }
 
     out.push({
-      project: '', // Navent cards have no project name → backend defaults to "Private Listing"
+      project,
       location: cardText(card, 'POSTING_CARD_LOCATION'),
       price,
       area: areaFromFeatures(features),

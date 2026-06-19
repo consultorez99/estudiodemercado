@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Pencil, Trash2, Check, X, Eraser } from 'lucide-react';
 
 const formatPrice = (num: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(num);
@@ -11,6 +11,7 @@ export default function Inventory({ data, onUpdateData }: { data?: any; onUpdate
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   useEffect(() => {
     if (!data) {
@@ -33,6 +34,11 @@ export default function Inventory({ data, onUpdateData }: { data?: any; onUpdate
     const updated = { ...localData, properties: localData.properties.filter((p: any) => p.id !== id) };
     persist(updated);
     setConfirmDeleteId(null);
+  };
+
+  const handleClearAll = () => {
+    persist({ ...localData, properties: [] });
+    setConfirmClearAll(false);
   };
 
   const handleEditStart = (property: any) => {
@@ -135,17 +141,35 @@ export default function Inventory({ data, onUpdateData }: { data?: any; onUpdate
             <h2 className="font-headline font-bold text-3xl text-on-surface">Inventory Control</h2>
             <p className="text-on-surface-variant mt-2">Master property database and metrics</p>
           </div>
-          <div className="relative w-full md:w-72">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={18} className="text-stone-400" />
+          <div className="flex items-center gap-3">
+            <div className="relative w-full md:w-72">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={18} className="text-stone-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search project or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Search project or location..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-            />
+            {confirmClearAll ? (
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                <span className="text-sm text-red-700 font-medium whitespace-nowrap">¿Borrar todo?</span>
+                <button onClick={handleClearAll} className="p-1 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors"><Check size={14} /></button>
+                <button onClick={() => setConfirmClearAll(false)} className="p-1 rounded bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors"><X size={14} /></button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmClearAll(true)}
+                disabled={properties.length === 0}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                <Eraser size={15} />
+                Borrar todo
+              </button>
+            )}
           </div>
         </div>
       </div>

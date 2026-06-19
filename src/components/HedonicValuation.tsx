@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Calculator, Database, RotateCcw, CheckCircle2, AlertCircle, AlertTriangle, MapPin } from 'lucide-react';
+import { Calculator, Database, RotateCcw, CheckCircle2, AlertCircle, AlertTriangle, MapPin, PackageOpen } from 'lucide-react';
 import {
   predict, contributions, calibrate, DEMO_MODEL, NUMERIC_FEATURES,
   type HedonicModel, type NumericFeature, type PropertyFeatures, type TrainingRow,
@@ -61,7 +61,27 @@ const EXAMPLE_CSV = `area,edad,pisos,banos,lote,anio,colonia,precio
 130,8,2,2,180,7,Lomas del Campestre,3850000
 110,3,1,2,150,7,Bosques del Prado,3600000`;
 
-export default function HedonicValuation() {
+function inventoryToTrainingRows(properties: any[]): TrainingRow[] {
+  return properties
+    .map((p) => ({
+      precio: Number((p.price ?? '').replace(/[^0-9.-]+/g, '')),
+      area:   Number((p.sqm   ?? '').replace(/[^0-9.-]+/g, '')),
+      banos:  p.bathrooms ?? 0,
+      pisos:  0,
+      edad:   0,
+      lote:   0,
+      anio:   0,
+      dist_centro: 0,
+      colonia: (p.location ?? '').trim() || 'Sin ubicación',
+    }))
+    .filter((r) => r.precio > 0 && r.area > 0);
+}
+
+export default function HedonicValuation({ data }: { data?: any }) {
+  const inventoryRows: TrainingRow[] = useMemo(
+    () => inventoryToTrainingRows(data?.properties ?? []),
+    [data],
+  );
   const [model, setModel] = useState<HedonicModel>(DEMO_MODEL);
   const [num, setNum] = useState<Record<NumericFeature, string>>({
     area: '120', edad: '5', pisos: '2', banos: '2', lote: '160', anio: '7',
@@ -173,6 +193,20 @@ export default function HedonicValuation() {
     persistTransactions([]);
     setPreview(null);
     setCalMsg({ kind: 'ok', text: 'Base de transacciones vaciada.' });
+  };
+
+  const importFromInventory = () => {
+    if (inventoryRows.length === 0)
+      return setCalMsg({ kind: 'err', text: 'El inventario está vacío. Importa anuncios primero desde AI Importer.' });
+    const seen = new Set(transactions.map(txFingerprint));
+    let added = 0;
+    const merged = [...transactions];
+    inventoryRows.forEach((r) => {
+      const fp = txFingerprint(r);
+      if (!seen.has(fp)) { seen.add(fp); merged.push(r); added++; }
+    });
+    persistTransactions(merged);
+    setCalMsg({ kind: 'ok', text: `Importados ${added} anuncios del inventario (${inventoryRows.length - added} ya existían). Total: ${merged.length}.` });
   };
 
   // Recalibra el modelo desde TODA la base acumulada. Opcionalmente agrupa las
@@ -320,11 +354,38 @@ export default function HedonicValuation() {
       {/* Calibration */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
         <h3 className="font-headline font-bold text-lg text-on-surface mb-1 flex items-center gap-2">
-          <Database size={20} className="text-[#00423c]" /> Base de transacciones & calibración
+          <Database size={20} className="text-[#00423c]" /> Base de datos & calibración
         </h3>
-        <p className="text-sm text-stone-500 mb-4">
-          Pega lotes de <b>ventas cerradas</b> y se <b>acumulan</b> en la base. El catálogo de colonias crece con la base.
-          Columnas: <code className="text-xs bg-stone-100 px-1 rounded">area, edad, pisos, banos, lote, anio, colonia, precio</code>.
+
+        {/* Disclaimer */}
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 mb-4">
+          <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800">
+            <b>Nota metodológica:</b> En México no existe un registro público de transacciones inmobiliarias cerradas.
+            Esta herramienta utiliza <b>precios de lista de anuncios</b> como proxy. Los resultados reflejan el mercado
+            de oferta, no necesariamente el precio de cierre real. Interpreta los estimados con ese contexto.
+          </p>
+        </div>
+
+        {/* Import from inventory */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200 mb-4">
+          <div>
+            <p className="text-sm font-bold text-on-surface">Importar desde inventario</p>
+            <p className="text-xs text-stone-500">{inventoryRows.length} anuncios disponibles con precio y área válidos</p>
+          </div>
+          <button
+            onClick={importFromInventory}
+            disabled={inventoryRows.length === 0}
+            className="flex items-center gap-2 bg-[#00423c] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#00423c]/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <PackageOpen size={16} /> Importar ({inventoryRows.length})
+          </button>
+        </div>
+
+        <p className="text-xs text-stone-400 mb-2">O pega un CSV manual con ventas cerradas si tienes acceso a esos datos:</p>
+        <p className="text-xs text-stone-400 mb-2">
+          Columnas: <code className="bg-stone-100 px-1 rounded">area, edad, pisos, banos, lote, anio, colonia, precio</code>.
+          Al importar desde inventario, edad/pisos/lote/anio se dejan en 0; solo área, baños, colonia y precio se usan.
         </p>
         <textarea
           className="w-full h-36 p-3 bg-surface rounded-lg border border-stone-200 focus:border-[#00423c] focus:ring-1 focus:ring-[#00423c] outline-none font-mono text-xs resize-none"

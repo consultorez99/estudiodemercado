@@ -83,7 +83,7 @@ export default function App() {
       case 'caprate':
         return <CapRateEstimator data={cleanedData} />;
       case 'hedonic':
-        return <HedonicValuation />;
+        return <HedonicValuation data={cleanedData} />;
       case 'trends':
         return <MarketTrends />;
       case 'archive':

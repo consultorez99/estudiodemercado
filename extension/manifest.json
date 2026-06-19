@@ -11,7 +11,8 @@
     "*://*.casasyterrenos.com/*",
     "*://*.propiedades.com/*",
     "http://localhost:3000/*",
-    "http://localhost:3001/*"
+    "http://localhost:3001/*",
+    "https://estudiodemercado.onrender.com/*"
   ],
   "action": {
     "default_title": "Capturar anuncios para Archivist AI",

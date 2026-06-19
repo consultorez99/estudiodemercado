@@ -159,6 +159,15 @@ function writeInbox(items: RawListing[]): void {
 const app = express();
 app.use(express.json({ limit: '4mb' }));
 
+// Allow Chrome extensions and the SPA to call the API from any origin.
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // Analyze a single batch of raw listing text and return structured rows.
 // The Gemini key lives only here — it is never sent to the browser.
 app.post('/api/analyze', async (req, res) => {

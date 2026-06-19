@@ -1,0 +1,602 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+\f3\fnil\fcharset0 Menlo-Regular;\f4\froman\fcharset0 Times-Italic;\f5\fnil\fcharset0 AppleColorEmoji;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid1\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid301\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Especificaci\'f3n de implementaci\'f3n \'97 Modelo de precio de vivienda (regresi\'f3n hed\'f3nica)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Para:
+\f1\b0  equipo / desarrollador de la app de estudio de mercado 
+\f0\b De:
+\f1\b0  Earvin 
+\f0\b Objetivo:
+\f1\b0  integrar un estimador de precio de vivienda basado en regresi\'f3n hed\'f3nica. Metodolog\'eda tomada de Wan et al. (2025) y Jha et al. (2025), 
+\f0\b adaptada al mercado mexicano
+\f1\b0 .\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Cambio importante vs. el paper:
+\f1\b0  la ubicaci\'f3n se modela con 
+\f0\b colonia/zona
+\f1\b0  (variable categ\'f3rica), NO con la distancia al centro. En el mercado mexicano la periferia es bimodal (fraccionamientos cerrados premium junto a vivienda social), por lo que la distancia radial no pondera el valor de forma confiable. La colonia lo captura mejor. La 
+\f0\b distancia al centro
+\f1\b0  queda como variable 
+\f0\b secundaria opcional
+\f1\b0 .\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 1. Qu\'e9 se pide implementar\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Dos piezas separadas:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Predicci\'f3n
+\f1\b0  (se ejecuta en cada consulta): aplica una f\'f3rmula con coeficientes ya calibrados y devuelve un precio estimado. Instant\'e1neo, sin entrenamiento.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Calibraci\'f3n
+\f1\b0  (espor\'e1dica): recalcula los coeficientes a partir de la base de transacciones reales mediante m\'ednimos cuadrados (OLS). Al entrar datos nuevos se vuelve a calibrar y se guardan los coeficientes.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 La app guarda los coeficientes; el usuario final solo dispara la predicci\'f3n.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. La f\'f3rmula de predicci\'f3n\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 Precio = 
+\f3 \uc0\u946 
+\f2 0\
+       + 
+\f3 \uc0\u946 
+\f2 1 \'b7 \'c1rea\
+       + 
+\f3 \uc0\u946 
+\f2 2 \'b7 Edad\
+       + 
+\f3 \uc0\u946 
+\f2 3 \'b7 Pisos\
+       + 
+\f3 \uc0\u946 
+\f2 4 \'b7 Ba\'f1os\
+       + 
+\f3 \uc0\u946 
+\f2 5 \'b7 Lote\
+       + 
+\f3 \uc0\u946 
+\f2 6 \'b7 A\'f1o\
+       + 
+\f3 \uc0\u947 
+\f2 (Colonia)                 
+\f3 \uc0\u8592 
+\f2  ajuste de zona (premium/descuento)\
+       + [opcional] 
+\f3 \uc0\u946 
+\f2 7 \'b7 DistanciaCentro\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 La parte nueva es 
+\f3\fs26 \uc0\u947 
+\f2 (Colonia)
+\f1\fs24 : un 
+\f0\b ajuste fijo por zona
+\f1\b0 . Cada colonia tiene su propio valor:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Se elige una 
+\f0\b colonia de referencia
+\f1\b0  cuyo ajuste vale 0 (su efecto queda absorbido en 
+\f3\fs26 \uc0\u946 
+\f2 0
+\f1\fs24 ).\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Cada otra colonia tiene un 
+\f3\fs26 \uc0\u947 
+\f1\fs24  que es su 
+\f0\b premium (+) o descuento (\uc0\u8722 )
+\f1\b0  respecto a la de referencia.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 En notaci\'f3n compacta:\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 Precio_estimado = 
+\f3 \uc0\u946 
+\f2 0 + 
+\f3 \uc0\u931 
+\f2 (
+\f3 \uc0\u946 
+\f2 i \'b7 xi_num\'e9rica) + 
+\f3 \uc0\u947 
+\f2 _colonia\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. Variables de entrada\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 S\'edmbolo\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Variable\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Unidad\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Tipo\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Signo esperado\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0 x1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'c1rea construida\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 m\'b2\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 n\'famero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 +\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x2\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Edad\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 a\'f1os\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 n\'famero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \uc0\u8722 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x3\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Pisos\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 conteo\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 entero \uc0\u8805  1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 depende del mercado\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Ba\'f1os\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 conteo\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 entero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 +\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x5\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Lote\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 m\'b2\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 n\'famero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 +\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x6\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 A\'f1o\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 0 = a\'f1o base del dataset\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 entero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 +\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 colonia
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Colonia / zona
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 categ\'f3rica
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 texto (de un cat\'e1logo)
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 cada zona su propio ajuste
+\f1\b0 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1300\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx1728
+\clvertalc \clshdrawnil \clwWidth1799\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx3456
+\clvertalc \clshdrawnil \clwWidth2288\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5184
+\clvertalc \clshdrawnil \clwWidth2206\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6912
+\clvertalc \clshdrawnil \clwWidth2716\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 x7 
+\f4\i (opcional)
+\f1\i0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Distancia al centro\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 km\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 n\'famero \uc0\u8805  0\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 no fijar a priori\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Salida:
+\f1\b0  
+\f2\fs26 Precio_estimado
+\f1\fs24  (moneda, n\'famero).\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 La colonia debe venir de un 
+\f0\b cat\'e1logo cerrado
+\f1\b0  (las zonas presentes en los datos de calibraci\'f3n). Si llega una colonia desconocida, ver secci\'f3n 8.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. Coeficientes actuales (calibraci\'f3n de ejemplo)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f5\b0\fs24 \cf0 \uc0\u9888 \u65039 
+\f1  Valores de 
+\f0\b demostraci\'f3n
+\f1\b0  (datos sint\'e9ticos). 
+\f0\b Deben recalcularse con transacciones reales
+\f1\b0  de Aguascalientes antes de producci\'f3n (ver secci\'f3n 5).\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 \{\
+  "modelo": "hedonico_lineal_ols",\
+  "version": "demo-2",\
+  "moneda": "MXN",\
+  "anio_base": 2019,\
+  "usa_distancia": false,\
+  "colonia_referencia": "Pulgas Pandas",\
+  "coeficientes_numericos": \{\
+    "intercepto": -88980.39,\
+    "area":         9905.30,\
+    "edad":        -5734.00,\
+    "pisos":       22742.92,\
+    "banos":       38220.81,\
+    "lote":          662.49,\
+    "anio":        55072.76\
+  \},\
+  "ajuste_colonia": \{\
+    "Pulgas Pandas":                0,\
+    "Centro":                  116282,\
+    "Jardines de la Asuncion": 334991,\
+    "Las Americas":            424485,\
+    "Lomas del Campestre":     881103,\
+    "Bosques del Prado":       969113\
+  \},\
+  "coeficiente_distancia_opcional": null,\
+  "calidad": \{\
+    "r2": 0.984,\
+    "rmse": 117354,\
+    "mnape": 0.039,\
+    "n_observaciones": 48\
+  \}\
+\}\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Lectura: una casa en 
+\f0\b Bosques del Prado
+\f1\b0  vale ~$969k m\'e1s que la misma casa en 
+\f0\b Pulgas Pandas
+\f1\b0  (la zona de referencia); en 
+\f0\b Centro
+\f1\b0 , ~$116k m\'e1s. El ajuste de zona es, en este mercado, uno de los componentes m\'e1s grandes del precio \'97 justo lo que motiv\'f3 usar colonia en vez de distancia.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. Calibraci\'f3n (OLS con variable categ\'f3rica)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 La colonia es texto; OLS necesita n\'fameros. El paso est\'e1ndar es 
+\f0\b one-hot encoding
+\f1\b0 : se crea una columna binaria (0/1) por colonia y se 
+\f0\b omite una
+\f1\b0  (la de referencia) para evitar colinealidad. El resto del procedimiento es OLS normal:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \uc0\u946 
+\f2  = (X
+\f3 \uc0\u7488 
+\f2  X)\uc0\u8315 \'b9 X
+\f3 \uc0\u7488 
+\f2  y\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 donde 
+\f2\fs26 X
+\f1\fs24  incluye las columnas num\'e9ricas 
+\f0\b m\'e1s
+\f1\b0  las columnas binarias de colonia (menos la de referencia). Los coeficientes de esas columnas binarias son exactamente los 
+\f2\fs26 ajuste_colonia
+\f1\fs24  del JSON.\
+No hay que programar el \'e1lgebra a mano:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls3\ilvl0
+\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Python:
+\f1\b0  
+\f2\fs26 pd.get_dummies(df, columns=['colonia'], drop_first=True)
+\f1\fs24  y luego 
+\f2\fs26 sklearn.linear_model.LinearRegression
+\f1\fs24  (o 
+\f2\fs26 statsmodels.OLS
+\f1\fs24 ).\
+\ls3\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 JavaScript / Node:
+\f1\b0  generar las columnas dummy manualmente y usar 
+\f2\fs26 ml-regression-multivariate-linear
+\f1\fs24 .\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Endpoint de calibraci\'f3n sugerido:
+\f1\b0  recibe el dataset, hace one-hot de colonia, corre OLS, guarda el JSON de la secci\'f3n 4 (incluida la lista de colonias y la de referencia) y lo marca como versi\'f3n activa.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 6. M\'e9tricas de calidad\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Calcular sobre un set de prueba (20% apartado, no usado en calibraci\'f3n):\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth840\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth7022\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5651\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f0\b \cf0 M\'e9trica\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 F\'f3rmula\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Interpretaci\'f3n\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth840\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth7022\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5651\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 R\'b2
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 1 \uc0\u8722  
+\f3 \uc0\u931 
+\f2 (real \uc0\u8722  estimado)\'b2 / 
+\f3 \uc0\u931 
+\f2 (real \uc0\u8722  promedio)\'b2
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Fracci\'f3n de la variaci\'f3n explicada (0 a 1; m\'e1s alto, mejor).\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth840\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth7022\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5651\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 RMSE
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 \uc0\u8730 ( 
+\f3 \uc0\u931 
+\f2 (real \uc0\u8722  estimado)\'b2 / n )
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Error t\'edpico en moneda; m\'e1s bajo, mejor.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth840\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth7022\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5651\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 MnAPE
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 `mediana(\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 real \uc0\u8722  estimado\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Referencia de los papers: el modelo lineal de Baltimore logr\'f3 R\'b2 \uc0\u8776  0.47 y MnAPE \u8776  26%; el no lineal subi\'f3 a R\'b2 \u8776  0.63 y MnAPE \u8776  19%.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 7. Pseudoc\'f3digo de la predicci\'f3n\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 funci\'f3n estimar_precio(propiedad, modelo):\
+    p = modelo.coeficientes_numericos.intercepto\
+    p += modelo.coeficientes_numericos.area  * propiedad.area\
+    p += modelo.coeficientes_numericos.edad  * propiedad.edad\
+    p += modelo.coeficientes_numericos.pisos * propiedad.pisos\
+    p += modelo.coeficientes_numericos.banos * propiedad.banos\
+    p += modelo.coeficientes_numericos.lote  * propiedad.lote\
+    p += modelo.coeficientes_numericos.anio  * propiedad.anio\
+\
+    // ajuste de zona: si la colonia no est\'e1 en el cat\'e1logo, se usa la de referencia (ajuste 0)\
+    p += modelo.ajuste_colonia[propiedad.colonia]  ?? 0\
+\
+    si modelo.usa_distancia:\
+        p += modelo.coeficiente_distancia_opcional * propiedad.dist_centro\
+\
+    devolver max(p, 0)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Referencia en Python\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 def estimar_precio(prop: dict, modelo: dict) -> float:\
+    c = modelo["coeficientes_numericos"]\
+    p = c["intercepto"]\
+    for k in ["area", "edad", "pisos", "banos", "lote", "anio"]:\
+        p += c[k] * prop[k]\
+    p += modelo["ajuste_colonia"].get(prop["colonia"], 0)   # zona desconocida -> referencia\
+    if modelo.get("usa_distancia") and modelo.get("coeficiente_distancia_opcional"):\
+        p += modelo["coeficiente_distancia_opcional"] * prop.get("dist_centro", 0)\
+    return max(p, 0.0)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Referencia en JavaScript\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 function estimarPrecio(prop, modelo) \{\
+  const c = modelo.coeficientes_numericos;\
+  let p = c.intercepto;\
+  for (const k of ["area", "edad", "pisos", "banos", "lote", "anio"]) \{\
+    p += c[k] * prop[k];\
+  \}\
+  p += modelo.ajuste_colonia[prop.colonia] ?? 0;   // zona desconocida -> referencia\
+  if (modelo.usa_distancia && modelo.coeficiente_distancia_opcional) \{\
+    p += modelo.coeficiente_distancia_opcional * (prop.dist_centro ?? 0);\
+  \}\
+  return Math.max(p, 0);\
+\}\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 8. Validaciones y reglas de negocio\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls4\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Colonia desconocida:
+\f1\b0  si la zona no est\'e1 en 
+\f2\fs26 ajuste_colonia
+\f1\fs24 , usar la de referencia (ajuste 0) y 
+\f0\b marcar el resultado como "ubicaci\'f3n no calibrada / baja confianza"
+\f1\b0 . No inventar un valor de zona.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls4\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 La lista de colonias v\'e1lidas debe exponerse a la UI desde el JSON del modelo (un 
+\f2\fs26 select
+\f1\fs24 , no texto libre).\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Acotar num\'e9ricos fuera de rango (no negativos; pisos \uc0\u8805  1) y 
+\f0\b no extrapolar
+\f1\b0  m\'e1s all\'e1 del rango de calibraci\'f3n (marcar baja confianza si el \'e1rea/lote excede lo visto en datos).\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Mostrar siempre 
+\f0\b versi\'f3n del modelo
+\f1\b0 , fecha de \'faltima calibraci\'f3n y 
+\f2\fs26 anio_base
+\f1\fs24 .\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Colonias con muy pocas transacciones dan ajustes inestables: conviene agruparlas por sector o nivel socioecon\'f3mico antes de calibrar.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 9. L\'edmite conocido del modelo\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Modelo 
+\f0\b lineal
+\f1\b0 : cada variable aporta un peso fijo y las variables no interact\'faan. Transparente y auditable, pero \'97como muestran ambos papers\'97 
+\f0\b no captura relaciones no lineales ni interacciones
+\f1\b0 . La evoluci\'f3n natural para m\'e1xima precisi\'f3n es 
+\f0\b Random Forest
+\f1\b0  o 
+\f0\b red neuronal
+\f1\b0  detr\'e1s de un endpoint aparte (ya tienes el cuaderno de Python que los entrena y los compara). Esta f\'f3rmula es la 
+\f0\b l\'ednea base
+\f1\b0  ideal para el primer release: r\'e1pida, explicable y suficiente.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 10. Recomendaci\'f3n de arquitectura\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Guarda 
+\f0\b todo el bloque JSON de la secci\'f3n 4 como configuraci\'f3n editable
+\f1\b0  (no incrustado en c\'f3digo). As\'ed, al recalibrar con datos reales o al a\'f1adir colonias, solo actualizas el JSON \'97incluida la lista de zonas y la de referencia\'97 sin tocar la l\'f3gica de predicci\'f3n.\
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --primary: #00423c;
+        --gold: #ffd700;
+      }
+      * { box-sizing: border-box; }
+      body {
+        width: 320px;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f6f3ee;
+        color: #1c1b1a;
+      }
+      header {
+        padding: 16px;
+        background: var(--primary);
+        color: #fff;
+      }
+      header h1 { margin: 0; font-size: 15px; font-weight: 800; }
+      header p { margin: 2px 0 0; font-size: 11px; opacity: 0.8; }
+      main { padding: 16px; }
+      .row { margin-bottom: 12px; }
+      label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b6b6b; margin-bottom: 4px; }
+      input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #d6d3ce;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+      .summary {
+        background: #fff;
+        border: 1px solid #e6e3de;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .summary b { color: var(--primary); }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-primary { background: var(--primary); color: #fff; }
+      .btn-secondary { background: #fff; border: 1px solid #d6d3ce; color: var(--primary); margin-top: 8px; }
+      .status { margin-top: 12px; font-size: 12px; padding: 8px 10px; border-radius: 8px; display: none; }
+      .status.ok { display: block; background: #e7f5ef; color: #0f5c46; }
+      .status.err { display: block; background: #fdecec; color: #b42318; }
+      .muted { color: #8a8a8a; font-size: 11px; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Archivist AI — Capturador</h1>
+      <p>Captura anuncios del portal que estás viendo</p>
+    </header>
+    <main>
+      <div class="row">
+        <label for="backend">Backend</label>
+        <input id="backend" type="text" placeholder="http://localhost:3001" />
+      </div>
+
+      <div class="summary" id="summary">Analizando la página…</div>
+
+      <button class="btn-primary" id="send" disabled style="margin-top:12px">Capturar y enviar</button>
+      <button class="btn-secondary" id="rescan">Volver a escanear</button>
+
+      <div class="status" id="status"></div>
+      <p class="muted">Consejo: respeta el ritmo del portal. Captura las páginas que abras manualmente; no automatices clics masivos.</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

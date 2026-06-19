@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Archivist AI — Capturador de Anuncios",
+  "version": "1.0.0",
+  "description": "Captura anuncios inmobiliarios del portal que estás viendo y los envía a Archivist AI, sin que te detecten como bot.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "*://*.inmuebles24.com/*",
+    "*://*.vivanuncios.com.mx/*",
+    "*://*.lamudi.com.mx/*",
+    "*://*.casasyterrenos.com/*",
+    "*://*.propiedades.com/*",
+    "http://localhost:3000/*",
+    "http://localhost:3001/*"
+  ],
+  "action": {
+    "default_title": "Capturar anuncios para Archivist AI",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.inmuebles24.com/*",
+        "*://*.vivanuncios.com.mx/*",
+        "*://*.lamudi.com.mx/*",
+        "*://*.casasyterrenos.com/*",
+        "*://*.propiedades.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

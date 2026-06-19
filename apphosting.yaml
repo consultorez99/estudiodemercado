@@ -1,0 +1,18 @@
+# Configuración de Firebase App Hosting
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Recursos del servidor (ajustables). 512 MiB sobra para esta app.
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0   # 0 = no pagas cuando nadie la usa (arranca en frío)
+  maxInstances: 2
+
+# Variables de entorno. La clave de Gemini se guarda como SECRETO en
+# Google Secret Manager (no en texto plano). Se crea con:
+#   firebase apphosting:secrets:set GEMINI_API_KEY
+env:
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+    availability:
+      - RUNTIME

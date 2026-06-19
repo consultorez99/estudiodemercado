@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(perl -i -pe 's/modify\\\\xc3\\\\x82?\\\\xc2?\\\\x{e2}.*?file watching/modify - file watching/ if $.==20' vite.config.ts)",
+      "Bash(sed -i '' '20s/.*/ \\\\/\\\\/ Do not modify - file watching is disabled to prevent flickering during agent edits./' vite.config.ts)"
+    ]
+  }
+}

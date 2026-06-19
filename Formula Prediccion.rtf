@@ -1,0 +1,278 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;\f1\fnil\fcharset0 HelveticaNeue;\f2\fnil\fcharset0 .AppleSystemUIFontMonospaced-Regular;
+\f3\fswiss\fcharset0 Helvetica;\f4\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid301\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab560
+\pard\pardeftab560\pardirnatural\partightenfactor0
+
+\f0\b\fs40 \cf0 Formula prediccion\
+\pard\pardeftab560\partightenfactor0
+\cf0 Especificaci\'f3n de implementaci\'f3n \'97 Modelo de precio de vivienda (regresi\'f3n hed\'f3nica lineal)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\fs26 \cf0 Para:
+\f1\b0  equipo / desarrollador de la app de estudio de mercado 
+\f0\b De:
+\f1\b0  Earvin 
+\f0\b Objetivo:
+\f1\b0  integrar un estimador de precio de vivienda basado en regresi\'f3n hed\'f3nica lineal (OLS). Metodolog\'eda tomada de Wan et al. (2025) y Jha et al. (2025).\
+\
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 1. Qu\'e9 se pide implementar\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\b0\fs26 \cf0 Dos piezas separadas:\
+\pard\pardeftab560\pardirnatural\partightenfactor0
+\ls1\ilvl0\cf0 {\listtext	1.	}
+\f0\b Predicci\'f3n
+\f1\b0  (se ejecuta en cada consulta del usuario): aplica una f\'f3rmula lineal con coeficientes ya calibrados y devuelve un precio estimado. Es instant\'e1neo, sin entrenamiento.\
+{\listtext	2.	}
+\f0\b Calibraci\'f3n
+\f1\b0  (se ejecuta de vez en cuando, no en cada consulta): recalcula los coeficientes a partir de la base de transacciones reales mediante m\'ednimos cuadrados (OLS). Cuando hay datos nuevos, se vuelve a calibrar y se guardan los coeficientes.\
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf0 La app guarda los coeficientes; el usuario final solo dispara la predicci\'f3n.\
+\
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 2. La f\'f3rmula de predicci\'f3n\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\b0\fs24 \cf0 Precio = \uc0\u946 0\
+       + \uc0\u946 1 \'b7 \'c1rea\
+       + \uc0\u946 2 \'b7 Edad\
+       + \uc0\u946 3 \'b7 Pisos\
+       + \uc0\u946 4 \'b7 Ba\'f1os\
+       + \uc0\u946 5 \'b7 Lote\
+       + \uc0\u946 6 \'b7 DistanciaCentro\
+       + \uc0\u946 7 \'b7 A\'f1o\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\fs26 \cf0 En notaci\'f3n compacta:\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\fs24 \cf0 Precio_estimado = \uc0\u946 0 + \u931  ( \u946 i \'b7 xi )\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\fs26 \cf0 donde 
+\fs24 xi
+\fs26  son las 7 caracter\'edsticas de la propiedad y 
+\fs24 \uc0\u946 i
+\fs26  el peso (coeficiente) de cada una. 
+\fs24 \uc0\u946 0
+\fs26  es el intercepto (precio base cuando todas las variables valen 0).\
+\
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 3. Variables de entrada\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\pardirnatural\partightenfactor0
+
+\f3\b0\fs24 \cf0 S\'edmbolo	Variable	Unidad	Tipo	Signo esperado\
+x1	\'c1rea construida	m\'b2	n\'famero \uc0\u8805  0	+\
+x2	Edad	a\'f1os	n\'famero \uc0\u8805  0	\u8722 \
+x3	Pisos	conteo	entero \uc0\u8805  1	depende del mercado\
+x4	Ba\'f1os	conteo	entero \uc0\u8805  0	+\
+x5	Lote	m\'b2	n\'famero \uc0\u8805  0	+\
+x6	Distancia al centro	km	n\'famero \uc0\u8805  0	depende del mercado\
+x7	A\'f1o	0 = a\'f1o base del dataset	entero \uc0\u8805  0	+
+\f1\fs26 \
+\pard\pardeftab560\slleading20\pardirnatural\partightenfactor0
+
+\f0\b \cf0 Salida:
+\f1\b0  
+\fs24 Precio_estimado
+\fs26  (moneda, n\'famero).\
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf0 \
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 4. Coeficientes actuales (calibraci\'f3n de ejemplo)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\b0\fs26 \cf0 \uc0\u9888 \u65039  Estos valores provienen de 
+\f0\b datos sint\'e9ticos de demostraci\'f3n
+\f1\b0 . Sirven para que la app funcione de inmediato, pero 
+\f0\b deben recalcularse con transacciones reales
+\f1\b0  antes de usarse en producci\'f3n (ver secci\'f3n 5).\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\fs24 \cf0 \{\
+  "modelo": "hedonico_lineal_ols",\
+  "version": "demo-1",\
+  "moneda": "MXN",\
+  "anio_base": 2019,\
+  "coeficientes": \{\
+    "intercepto": 301854.75,\
+    "area":         8705.86,\
+    "edad":        -4644.78,\
+    "pisos":       30550.94,\
+    "banos":       16738.65,\
+    "lote":         1527.90,\
+    "dist_centro": -11171.11,\
+    "anio":        50015.26\
+  \},\
+  "calidad": \{\
+    "r2": 0.966,\
+    "rmse": 178914,\
+    "mnape": 0.055,\
+    "n_observaciones": 40\
+  \}\
+\}\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\fs26 \cf0 Lectura r\'e1pida de los pesos: cada m\'b2 construido suma ~$8,706; cada a\'f1o de antig\'fcedad resta ~$4,645; cada ba\'f1o suma ~$16,739; cada km de distancia al centro resta ~$11,171; cada a\'f1o transcurrido suma ~$50,015. (Valores de demo.)\
+\
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 5. Calibraci\'f3n: c\'f3mo se obtienen los coeficientes (OLS)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\b0\fs26 \cf0 Los coeficientes se estiman por 
+\f0\b m\'ednimos cuadrados ordinarios
+\f1\b0 , que minimizan la suma de los errores al cuadrado entre el precio real y el estimado. La soluci\'f3n cerrada es:\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\fs24 \cf0 \uc0\u946  = (X\u7488  X)\u8315 \'b9 X\u7488  y\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\fs26 \cf0 donde:\
+\pard\pardeftab560\pardirnatural\partightenfactor0
+\ls2\ilvl0
+\f4\fs18 \cf0 {\listtext	\uc0\u8226 	}
+\f1\fs26 X = matriz de transacciones (una fila por propiedad; una columna por variable, m\'e1s una columna de unos para el intercepto).\
+\ls2\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f1\fs26 y = vector de precios reales.\
+\ls2\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f1\fs26 \uc0\u946  = vector de coeficientes resultante.\
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf0 En la pr\'e1ctica 
+\f0\b no hay que programar la inversi\'f3n de matrices a mano
+\f1\b0 ; cualquier librer\'eda est\'e1ndar lo resuelve:\
+\pard\pardeftab560\pardirnatural\partightenfactor0
+\ls3\ilvl0
+\f4\fs18 \cf0 {\listtext	\uc0\u8226 	}
+\f0\b\fs26 Python:
+\f1\b0  numpy.linalg.lstsq, sklearn.linear_model.LinearRegression, o statsmodels.OLS.\
+\ls3\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f0\b\fs26 JavaScript / Node:
+\f1\b0  ml-regression-multivariate-linear, o mathjs para el \'e1lgebra.\
+\ls3\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f0\b\fs26 Excel/Sheets (referencia):
+\f1\b0  LINEST.\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\b \cf0 Endpoint sugerido de calibraci\'f3n:
+\f1\b0  recibe el dataset completo, corre OLS, guarda el JSON de la secci\'f3n 4 (coeficientes + m\'e9tricas) y lo marca como versi\'f3n activa.\
+\
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 6. M\'e9tricas de calidad (para mostrar confianza del modelo)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\b0\fs26 \cf0 La app deber\'eda exhibir estas tres, calculadas sobre un set de prueba (20% de los datos apartado, que no se us\'f3 para calibrar):\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\pardirnatural\partightenfactor0
+
+\f3\fs24 \cf0 M\'e9trica	F\'f3rmula	Interpretaci\'f3n\
+R\'b2	
+\f1 1 \uc0\u8722  \u931 (real \u8722  estimado)\'b2 / \u931 (real \u8722  promedio)\'b2
+\f3 	Fracci\'f3n de la variaci\'f3n del precio que el modelo explica (0 a 1; m\'e1s alto, mejor).\
+RMSE	
+\f1 \uc0\u8730 ( \u931 (real \u8722  estimado)\'b2 / n )
+\f3 	Error t\'edpico en moneda; m\'e1s bajo, mejor.\
+MnAPE	`mediana(	real \uc0\u8722  estimado
+\f1\fs26 \
+\pard\pardeftab560\slleading20\pardirnatural\partightenfactor0
+\cf0 Referencia de los papers para contexto: el modelo lineal de Baltimore logr\'f3 R\'b2 \uc0\u8776  0.47 y MnAPE \u8776  26%; un modelo no lineal (red neuronal) subi\'f3 a R\'b2 \u8776  0.63 y MnAPE \u8776  19%.\
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf0 \
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 7. Pseudoc\'f3digo de la predicci\'f3n\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\b0\fs24 \cf0 funci\'f3n estimar_precio(propiedad, coef):\
+    p = coef.intercepto\
+    p += coef.area        * propiedad.area\
+    p += coef.edad        * propiedad.edad\
+    p += coef.pisos       * propiedad.pisos\
+    p += coef.banos       * propiedad.banos\
+    p += coef.lote        * propiedad.lote\
+    p += coef.dist_centro * propiedad.dist_centro\
+    p += coef.anio        * propiedad.anio\
+    devolver max(p, 0)        // un precio negativo se trunca a 0\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\b\fs26 \cf0 Referencia en Python\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\b0\fs24 \cf0 def estimar_precio(prop: dict, coef: dict) -> float:\
+    p = coef["intercepto"]\
+    for k in ["area","edad","pisos","banos","lote","dist_centro","anio"]:\
+        p += coef[k] * prop[k]\
+    return max(p, 0.0)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\b\fs26 \cf0 Referencia en JavaScript\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f2\b0\fs24 \cf0 function estimarPrecio(prop, coef) \{\
+  let p = coef.intercepto;\
+  for (const k of ["area","edad","pisos","banos","lote","dist_centro","anio"]) \{\
+    p += coef[k] * prop[k];\
+  \}\
+  return Math.max(p, 0);\
+\}\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\fs26 \cf0 \
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 8. Validaciones y reglas de negocio\
+\pard\pardeftab560\pardirnatural\partightenfactor0
+\ls4\ilvl0
+\f4\b0\fs18 \cf0 {\listtext	\uc0\u8226 	}
+\f1\fs26 Rechazar / acotar valores fuera de rango (\'e1rea, lote, ba\'f1os, etc. no negativos; pisos \uc0\u8805  1).\
+\ls4\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f1\fs26 Idealmente, 
+\f0\b no extrapolar
+\f1\b0  m\'e1s all\'e1 del rango de los datos de calibraci\'f3n (p. ej. si la app pide una casa de 2,000 m\'b2 pero el dataset llega a 350 m\'b2, marcar la estimaci\'f3n como "fuera de rango / baja confianza").\
+\ls4\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f1\fs26 Mostrar siempre la 
+\f0\b versi\'f3n del modelo
+\f1\b0  y la fecha de \'faltima calibraci\'f3n junto al resultado.\
+\ls4\ilvl0
+\f4\fs18 {\listtext	\uc0\u8226 	}
+\f1\fs26 Guardar el anio_base para que el usuario sepa respecto a qu\'e9 a\'f1o se mide la variable "A\'f1o".\
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf0 \
+\pard\pardeftab560\sa40\partightenfactor0
+
+\f0\b\fs32 \cf0 9. L\'edmite conocido del modelo (importante para fijar expectativas)\
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f1\b0\fs26 \cf0 Este es un modelo 
+\f0\b lineal
+\f1\b0 : asume que cada variable aporta un peso fijo y que las variables no interact\'faan entre s\'ed. Es transparente y f\'e1cil de auditar, pero \'97como demuestran ambos papers\'97 
+\f0\b no captura relaciones no lineales ni interacciones
+\f1\b0  (por ejemplo: casas hist\'f3ricas que recuperan valor, el efecto de la distancia que tiene un punto \'f3ptimo en los suburbios, o que el efecto de los pisos cambia seg\'fan el tama\'f1o).\
+Para m\'e1xima precisi\'f3n, la evoluci\'f3n natural es un modelo de 
+\f0\b Random Forest
+\f1\b0  o 
+\f0\b red neuronal
+\f1\b0 , que se servir\'eda detr\'e1s de un endpoint aparte. La f\'f3rmula lineal de este documento es la 
+\f0\b l\'ednea base
+\f1\b0  ideal para arrancar: r\'e1pida, explicable y suficiente para un primer release.\
+}

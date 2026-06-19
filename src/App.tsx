@@ -77,7 +77,7 @@ export default function App() {
       case 'map':
         return <MapView data={cleanedData} />;
       case 'inventory':
-        return <Inventory data={cleanedData} />;
+        return <Inventory data={cleanedData} onUpdateData={setAppData} />;
       case 'yield':
         return <YieldAnalysis data={cleanedData} />;
       case 'caprate':

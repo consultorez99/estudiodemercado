@@ -144,7 +144,8 @@ function parseNaventCards() {
 
     // Try to extract a project/development name from the card.
     // Reject anything that looks like a price or numeric feature text.
-    const looksLikePrice = (s) => /\$|mxn|usd|\d{4,}/i.test(s);
+    // Match prices like "$3,780,000", "MXN 3780000", "MN 3,780,000", "3.780.000"
+    const looksLikePrice = (s) => /\$|mxn|usd|\bmn\b|\d[\d,.]{3,}/i.test(s);
     const titleEl = card.querySelector('h2, h3, [data-qa*="TITLE"], [data-qa*="title"]');
     let project = '';
     if (titleEl) {

@@ -82,7 +82,7 @@ function normalizeListing(item: any): RawListing | null {
   // it from the colonia via the editable lookup table.
   const postalCode = item?.postalCode ? String(item.postalCode).trim() : lookupCp(location);
   const listing: RawListing = {
-    project: String(item?.project ?? item?.name ?? '').trim() || 'Private Listing',
+    project: String(item?.project ?? item?.name ?? '').trim() || 'N/A',
     location,
     price: toNumber(item?.price),
     area: toNumber(item?.area),

@@ -107,9 +107,30 @@ function countFrom(s, re) {
   return m ? Number(m[1]) : null;
 }
 
+// Collect posting cards that are inside a "Recomendaciones" section so we can
+// exclude them — those are cross-sell widgets, not the page's main listings.
+function getRecommendedCards() {
+  const excluded = new Set();
+  for (const heading of document.querySelectorAll('h2, h3, h4, [class*="title"], [class*="heading"], p')) {
+    if (!/recomend/i.test(heading.textContent)) continue;
+    let container = heading.parentElement;
+    while (container && container !== document.body) {
+      const cards = container.querySelectorAll('[data-qa^="posting "]');
+      if (cards.length > 0) {
+        cards.forEach((c) => excluded.add(c));
+        break;
+      }
+      container = container.parentElement;
+    }
+  }
+  return excluded;
+}
+
 function parseNaventCards() {
   const out = [];
+  const recommended = getRecommendedCards();
   for (const card of document.querySelectorAll('[data-qa^="posting "]')) {
+    if (recommended.has(card)) continue;
     const priceText = cardText(card, 'POSTING_CARD_PRICE');
     if (!priceText) continue;
     // Skip non-peso prices so they don't distort MXN price/m² averages.
